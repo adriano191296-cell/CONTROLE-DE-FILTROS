@@ -1,0 +1,34 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "br.com.sococo.controlefiltros"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "br.com.sococo.controlefiltros"
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ["$buildDir/generated/offlineAssets"]
+        }
+    }
+}
+
+tasks.register("copyOfflineAssets", Copy) {
+    from(rootProject.file("../index.html"))
+    from(rootProject.file("../manifest.webmanifest"))
+    from(rootProject.file("../sw.js"))
+    from(rootProject.file("../assets")) {
+        into "assets"
+    }
+    into(layout.buildDirectory.dir("generated/offlineAssets"))
+}
+
+preBuild.dependsOn(copyOfflineAssets)

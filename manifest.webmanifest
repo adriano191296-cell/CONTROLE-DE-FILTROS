@@ -1,0 +1,21 @@
+{
+  "name": "Controle de Filtros da Frota",
+  "short_name": "Filtros Frota",
+  "description": "Controle offline de filtros e estoque da frota.",
+  "id": "/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1b1f24",
+  "theme_color": "#1b1f24",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

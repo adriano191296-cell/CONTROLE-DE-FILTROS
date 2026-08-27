@@ -2,16 +2,18 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Controle de Filtros da Frota</title>
 <meta name="theme-color" content="#1b1f24">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Filtros Frota">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%231b1f24'/%3E%3Crect x='10' y='10' width='80' height='80' rx='14' fill='%23ff7a1a'/%3E%3Ctext x='50' y='63' font-family='Arial' font-weight='900' font-size='42' fill='%231b1f24' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff7a1a'/%3E%3Ctext x='50' y='63' font-family='Arial' font-weight='900' font-size='42' fill='%231b1f24' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
-<link rel="manifest" href='data:application/json,{"name":"Controle de Filtros da Frota","short_name":"Filtros Frota","start_url":".","display":"standalone","background_color":"%231b1f24","theme_color":"%231b1f24","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23ff7a1a\'/%3E%3Ctext x=\'50\' y=\'63\' font-family=\'Arial\' font-weight=\'900\' font-size=\'42\' fill=\'%231b1f24\' text-anchor=\'middle\'%3ECF%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
+<meta name="application-name" content="Filtros Frota">
+<meta name="description" content="Controle offline de filtros e estoque da frota.">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+<link rel="manifest" href="manifest.webmanifest">
 <style>
   :root{
     --bg:#1b1f24;
@@ -33,19 +35,23 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  html{background:var(--bg);}
   body{
     background:var(--bg);
     color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     min-height:100vh;
-    padding-bottom:80px;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+    -webkit-text-size-adjust:100%;
   }
+  button,input,select{font:inherit;}
+  button{-webkit-tap-highlight-color:transparent;}
   .mono{font-family:ui-monospace,"Cascadia Code","SF Mono",Consolas,"Courier New",monospace;}
 
   header.top{
     background:linear-gradient(180deg,#20252b,#1b1f24);
     border-bottom:2px solid var(--surface-3);
-    padding:18px 16px 14px;
+    padding:calc(18px + env(safe-area-inset-top)) 16px 14px;
     position:sticky;
     top:0;
     z-index:20;
@@ -54,6 +60,7 @@
     display:flex;
     align-items:center;
     gap:10px;
+    min-width:0;
   }
   .brand .mark{
     width:34px;height:34px;
@@ -72,6 +79,7 @@
     letter-spacing:.3px;
     text-transform:uppercase;
     font-family:"Arial Narrow",Arial,sans-serif;
+    overflow-wrap:anywhere;
   }
   .sub{
     font-size:11.5px;
@@ -131,7 +139,9 @@
     gap:6px;
     margin-top:12px;
     overflow-x:auto;
+    scrollbar-width:none;
   }
+  .tabs::-webkit-scrollbar,.summary-row::-webkit-scrollbar{display:none;}
   .tab{
     flex-shrink:0;
     padding:8px 14px;
@@ -217,6 +227,7 @@
     font-weight:800;
     font-size:14.5px;
     line-height:1.3;
+    overflow-wrap:anywhere;
   }
   .equip-moj{
     font-size:11.5px;
@@ -263,6 +274,8 @@
   .filtro-tipo{
     font-size:13px;
     font-weight:600;
+    min-width:0;
+    overflow-wrap:anywhere;
   }
   .filtro-codes{
     grid-column:1 / 2;
@@ -361,6 +374,7 @@
     font-size:12px;
     font-weight:600;
     cursor:pointer;
+    min-height:44px;
   }
 
   .overlay{
@@ -381,6 +395,7 @@
     max-height:88vh;
     overflow-y:auto;
     padding:20px 18px 26px;
+    padding-bottom:calc(26px + env(safe-area-inset-bottom));
   }
   .sheet h2{
     font-size:16px;
@@ -438,6 +453,62 @@
 
   ::-webkit-scrollbar{width:6px;height:6px;}
   ::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:3px;}
+
+  @media (min-width: 900px){
+    header.top{
+      padding-left:24px;
+      padding-right:24px;
+    }
+    main,.toolbar-bottom,.sheet{max-width:920px;}
+    main{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      align-items:start;
+    }
+    .equip-card{margin-bottom:0;}
+    .empty-state{grid-column:1 / -1;}
+  }
+
+  @media (max-width: 560px){
+    body{padding-bottom:calc(150px + env(safe-area-inset-bottom));}
+    header.top{padding-left:12px;padding-right:12px;}
+    main{padding-left:12px;padding-right:12px;}
+    .toolbar-bottom{
+      padding:0 12px;
+      flex-wrap:wrap;
+    }
+    .toolbar-bottom button{
+      flex:1 1 calc(50% - 8px);
+      padding:10px 8px;
+      font-size:11.5px;
+    }
+    .equip-head{
+      align-items:flex-start;
+    }
+    .equip-meta{
+      flex-direction:column;
+      align-items:flex-end;
+      gap:6px;
+    }
+    .filtro-row{
+      grid-template-columns:minmax(0,1fr) 54px;
+    }
+    .field-row,.equip-footer{
+      flex-direction:column;
+    }
+    .cat-row{
+      align-items:stretch;
+      flex-wrap:wrap;
+    }
+    .cat-row input[type="text"]{
+      flex:1 1 100%;
+    }
+    .fab{
+      right:14px;
+      bottom:calc(14px + env(safe-area-inset-bottom));
+    }
+  }
 </style>
 </head>
 <body>
@@ -470,6 +541,7 @@
   <input type="file" id="fileImport" accept=".json" style="display:none;">
 </div>
 <div class="toolbar-bottom" style="margin-top:8px;">
+  <button id="btnManageCodigos">&#128295; Editar código cadastrado</button>
   <button id="btnInstallHelp">&#128241; Como instalar no celular</button>
 </div>
 
@@ -564,15 +636,33 @@
   <div class="sheet">
     <h2>Instalar no celular</h2>
     <div style="font-size:13px;line-height:1.7;color:var(--text-dim);">
-      <p><b style="color:var(--text)">Android (Chrome):</b><br>
-      Toque nos 3 pontinhos (canto superior) &rarr; <b>"Adicionar à tela inicial"</b> ou <b>"Instalar app"</b>. Vai aparecer um ícone como qualquer outro aplicativo, e os dados salvos continuam no celular.</p>
-      <p><b style="color:var(--text)">iPhone (Safari):</b><br>
-      Toque no ícone de compartilhar (quadrado com seta) &rarr; <b>"Adicionar à Tela de Início"</b>.</p>
+      <p><b style="color:var(--text)">Android com APK:</b><br>
+      Este projeto agora tem a pasta <b>android</b>. Gere o APK por ela e instale o arquivo no celular; assim vira aplicativo instalado de verdade, sem depender de "Adicionar à tela inicial".</p>
+      <p><b style="color:var(--text)">Android pelo navegador:</b><br>
+      Se você abrir por um link HTTPS, o Chrome também pode mostrar <b>"Instalar app"</b>. O app fica em tela cheia e continua abrindo offline depois do primeiro carregamento.</p>
       <p style="margin-top:14px;color:var(--text-faint);font-size:12px;">
-      Assim funciona hoje, direto do arquivo. Para um app 100% instalável (com tela cheia e cache offline completo), o ideal é hospedar este arquivo num link fixo (ex: GitHub Pages, grátis) — posso te ajudar a montar isso quando quiser.</p>
+      Abrir o HTML direto como arquivo continua funcionando, mas service worker só é liberado pelo navegador em localhost ou HTTPS.</p>
     </div>
     <div class="sheet-actions">
       <button class="btn-primary" id="btnCloseInstall" style="flex:1;">Entendi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet: editar código já cadastrado -->
+<div class="overlay" id="overlayCodigos">
+  <div class="sheet">
+    <h2>Editar código cadastrado</h2>
+    <p style="font-size:11.5px;color:var(--text-faint);margin-top:-8px;margin-bottom:12px;">
+      Altere um código de almoxarifado abaixo e ele será atualizado automaticamente
+      em <b>todos</b> os equipamentos/filtros que usam esse mesmo código.
+    </p>
+    <div class="field">
+      <input type="text" id="codigoSearchInput" placeholder="Buscar código...">
+    </div>
+    <div id="codigosList" style="max-height:50vh;overflow-y:auto;"></div>
+    <div class="sheet-actions">
+      <button class="btn-secondary" id="btnCloseCodigos">Fechar</button>
     </div>
   </div>
 </div>
@@ -600,11 +690,15 @@ if(xr(e,"index.xml"))throw new Error("Unsupported NUMBERS 09 file");throw new Er
 </script>
 <script>
 /* ===================== DADOS INICIAIS ===================== */
-/* Transcrito das fotos enviadas (planilha "Controle de Estoque de Filtro").
-   Itens manuscritos a lápis/caneta no rodapé das páginas (Motocana 321,
-   Motoniveladora 322, John Deere) ficaram ilegíveis com segurança e NÃO
-   foram incluídos — adicione-os manualmente quando revisar o papel. */
+/* SEED_VERSION 2 — Transcrito das 8 paginas enviadas em PDF (controle completo
+   de filtros da frota: tratores, onibus, caminhoes, maquinas pesadas,
+   automoveis, motocicleta e equipamentos estacionarios).
+   Trechos manuscritos, rasurados ou com numeros sobrepostos foram marcados
+   com "(conferir)" no proprio nome do filtro — revise esses itens no papel
+   original quando possivel. */
+const SEED_VERSION = 2;
 const SEED = [
+  /* ---------- TRATORES (New Holland - pagina 1) ---------- */
   {
     categoria:"tratores", marcaModelo:"New Holland 6630", moj:"MOJ 410 (Motocran)",
     filtros:[
@@ -673,6 +767,43 @@ const SEED = [
     ]
   },
   {
+    categoria:"tratores", marcaModelo:"Trator TT.5", moj:"MOJ 449",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0202", troca:"", estoque:0},
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0203", troca:"", estoque:0},
+      {tipo:"Filtro Combustível (2)", refOrig:"", codAlmox:"5221-0696", troca:"", estoque:0},
+      {tipo:"Filtro Sep. Água Comb.", refOrig:"", codAlmox:"5221-0721", troca:"", estoque:0},
+      {tipo:"Filtro Hidráulico", refOrig:"", codAlmox:"5221-0720", troca:"", estoque:0},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0666", troca:"", estoque:0},
+    ]
+  },
+  {
+    categoria:"tratores", marcaModelo:"John Deere 6125J", moj:"MOJ 440",
+    filtros:[
+      {tipo:"Filtro Hidráulico Implemento (isolado - conferir)", refOrig:"AL203061", codAlmox:"5221-0354", troca:"", estoque:0},
+      {tipo:"Filtro Transmissão/Hidráulico", refOrig:"AL221066", codAlmox:"5221-0355", troca:"", estoque:0},
+      {tipo:"Filtro do Óleo Lub. Motor", refOrig:"RE504836", codAlmox:"5221-0356", troca:"", estoque:1},
+      {tipo:"Filtro Combustível", refOrig:"RE544394", codAlmox:"5221-0357", troca:"", estoque:1},
+      {tipo:"Filtro Combustível", refOrig:"RE546336", codAlmox:"5221-0358", troca:"", estoque:1},
+      {tipo:"Filtro de Ar Prim.", refOrig:"AL172780", codAlmox:"5221-0670", troca:"", estoque:0},
+      {tipo:"Filtro de Ar Sec.", refOrig:"AL150288", codAlmox:"5221-0553", troca:"", estoque:0},
+    ]
+  },
+  {
+    categoria:"tratores", marcaModelo:"New Holland 7630 (registro 2 - conferir)", moj:"MOJ 441",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0202", troca:"", estoque:0},
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0203", troca:"", estoque:0},
+      {tipo:"Filtro Óleo Lubrificante", refOrig:"84226488", codAlmox:"5221-0857 (conferir)", troca:"", estoque:0},
+      {tipo:"Filtro Óleo Hidráulico", refOrig:"47628830", codAlmox:"5221-0372", troca:"", estoque:0},
+      {tipo:"Filtro Óleo Transmissão", refOrig:"", codAlmox:"5221-0836", troca:"", estoque:0},
+      {tipo:"Filtro Combustível 2", refOrig:"5802721728", codAlmox:"5221-0669 (conferir)", troca:"", estoque:0},
+      {tipo:"Filtro Combustível Racor", refOrig:"51629287", codAlmox:"5221-0669 (conferir)", troca:"", estoque:0},
+    ]
+  },
+
+  /* ---------- MÁQUINAS PESADAS ---------- */
+  {
     categoria:"maquinas-pesadas", marcaModelo:"Valmet 885S (Motocana)", moj:"MOJ 308",
     filtros:[
       {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0063", troca:"Abstrução", estoque:1},
@@ -726,6 +857,288 @@ const SEED = [
       {tipo:"Racor", refOrig:"", codAlmox:"5221-0033", troca:"", estoque:0},
     ]
   },
+  {
+    categoria:"maquinas-pesadas", marcaModelo:"Motocana 321 (John Deere - conferir)", moj:"",
+    filtros:[
+      {tipo:"Filtro Combustível", refOrig:"RE62418", codAlmox:"5221-0674", troca:"", estoque:0},
+      {tipo:"Filtro Combustível", refOrig:"DA24097 (conferir)", codAlmox:"5221-0675", troca:"", estoque:0},
+      {tipo:"Filtro Hid. da Direção", refOrig:"AL221066", codAlmox:"5221-0355", troca:"", estoque:0},
+      {tipo:"Filtro Lubrif. do Motor", refOrig:"RE504836", codAlmox:"5221-0356", troca:"", estoque:0},
+      {tipo:"Filtro Ar Primário", refOrig:"AL172780", codAlmox:"5221-0554", troca:"", estoque:0},
+      {tipo:"Filtro de Ar Sec.", refOrig:"AL150288", codAlmox:"5221-0553", troca:"", estoque:0},
+    ]
+  },
+  {
+    categoria:"maquinas-pesadas", marcaModelo:"Motoniveladora 322 (John Deere - conferir)", moj:"",
+    filtros:[
+      {tipo:"Filtro de Ar Interno (cabine - conferir)", refOrig:"", codAlmox:"5221-0686", troca:"", estoque:0},
+      {tipo:"Filtro de Ar Externo (conferir)", refOrig:"", codAlmox:"5221-0685", troca:"", estoque:0},
+      {tipo:"Filtro Comb. 1ª Sep. (conferir)", refOrig:"", codAlmox:"5221-0687", troca:"", estoque:3},
+      {tipo:"Filtro Comb. 2ª Sec. (conferir)", refOrig:"", codAlmox:"5221-0588", troca:"", estoque:1},
+      {tipo:"Filtro Diesel (conferir)", refOrig:"", codAlmox:"5221-0688", troca:"", estoque:2},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0356", troca:"", estoque:1},
+      {tipo:"Filtro Hidráulico (conferir)", refOrig:"", codAlmox:"5221-0690", troca:"", estoque:3},
+    ]
+  },
+  {
+    categoria:"maquinas-pesadas", marcaModelo:"Rolo Compactador", moj:"MOJ 323",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0693", troca:"", estoque:0},
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0694", troca:"", estoque:0},
+      {tipo:"Filtro Combustível (2)", refOrig:"", codAlmox:"5221-0696", troca:"", estoque:0},
+      {tipo:"Filtro Comb. Sep. Água", refOrig:"", codAlmox:"5221-0701", troca:"", estoque:0},
+      {tipo:"Filtro Hidráulico", refOrig:"", codAlmox:"5221-0702", troca:"", estoque:0},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0689", troca:"", estoque:0},
+      {tipo:"Filtro de Ar da Cabine", refOrig:"", codAlmox:"5221-0692", troca:"", estoque:0},
+    ]
+  },
+  {
+    categoria:"maquinas-pesadas", marcaModelo:"Volvo BM 100 (Motocana)", moj:"MOJ 313/314/319",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0242", troca:"Abstrução", estoque:3},
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0140", troca:"Abstrução", estoque:3},
+      {tipo:"Filtro Combustível (2)", refOrig:"", codAlmox:"5221-0021", troca:"300 HR", estoque:0},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0008", troca:"300 HR", estoque:0},
+      {tipo:"Filtro Hid. Direção", refOrig:"", codAlmox:"5221-0199", troca:"300 HR", estoque:0},
+      {tipo:"Filtro Hid. Ret. Lança", refOrig:"", codAlmox:"5221-0014", troca:"600 HR", estoque:0},
+      {tipo:"Filtro Tela (Sist. Hid.)", refOrig:"", codAlmox:"5221-0198", troca:"300 HR", estoque:0},
+      {tipo:"Filtro Comb. Sep. Água (obs. Motocana 314-319)", refOrig:"", codAlmox:"5221-0322", troca:"300 HR", estoque:1},
+      {tipo:"Filtro Combustível (obs. Motocana 314-319)", refOrig:"", codAlmox:"5221-0321", troca:"300 HR", estoque:2},
+    ]
+  },
+  {
+    categoria:"maquinas-pesadas", marcaModelo:"New Holland TS 90 (Motocana)", moj:"MOJ 312",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0175", troca:"Abstrução", estoque:2},
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0174", troca:"Abstrução", estoque:2},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0186", troca:"300 HR", estoque:1},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0105", troca:"300 HR", estoque:6},
+      {tipo:"Filtro Hid. Ret. Lança", refOrig:"", codAlmox:"5221-0014", troca:"600 HR", estoque:0},
+      {tipo:"Filtro Hid. Direção", refOrig:"", codAlmox:"5221-0501", troca:"300 HR", estoque:1},
+      {tipo:"Filtro Hidráulico", refOrig:"", codAlmox:"5221-0290 / 5221-0836", troca:"300 HR", estoque:2},
+    ]
+  },
+  {
+    categoria:"maquinas-pesadas", marcaModelo:"Rolo Compactador CAT CS-423E", moj:"MOJ 316",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"110-6331", codAlmox:"5221-0430 / 5221-0181", troca:"Abstrução", estoque:4},
+      {tipo:"Filtro de Ar Externo", refOrig:"1106326", codAlmox:"5221-0196", troca:"Abstrução", estoque:2},
+      {tipo:"Filtro Combustível", refOrig:"1R-1804", codAlmox:"5221-0195", troca:"500 HR", estoque:2},
+      {tipo:"Filtro Lubrificante", refOrig:"7W-2326", codAlmox:"5221-0244 (ou 0193)", troca:"500 HR", estoque:2},
+      {tipo:"Filtro Sedimentador", refOrig:"AT365870", codAlmox:"5221-0587", troca:"500 HR", estoque:0},
+      {tipo:"Filtro Hidráulico", refOrig:"1G-8878", codAlmox:"5221-0194", troca:"500 HR", estoque:0},
+    ]
+  },
+  {
+    categoria:"maquinas-pesadas", marcaModelo:"Escavadeira Hidráulica 210G (John Deere)", moj:"MOJ 320",
+    filtros:[
+      {tipo:"Elem. Filtro Comb. Sep. Água (Primário)", refOrig:"AT365870", codAlmox:"5221-0587", troca:"", estoque:2},
+      {tipo:"Elem. Filtro Comb. (Secundário)", refOrig:"RE541922", codAlmox:"5221-0588", troca:"", estoque:1},
+      {tipo:"Elem. Filtro Comb. (Terceiro)", refOrig:"RE541925", codAlmox:"5221-0589", troca:"", estoque:1},
+      {tipo:"Filtro de Óleo Lub. do Motor", refOrig:"RE539279", codAlmox:"5221-0590", troca:"", estoque:1},
+      {tipo:"Filtro Ar Primário", refOrig:"AT300487", codAlmox:"5221-0591", troca:"", estoque:1},
+      {tipo:"Filtro Ar Secundário", refOrig:"AT314583", codAlmox:"5221-0592", troca:"", estoque:1},
+      {tipo:"Filtro Hid. Piloto", refOrig:"4630525", codAlmox:"5221-0625", troca:"", estoque:1},
+      {tipo:"Filtro Hid. Retorno", refOrig:"", codAlmox:"5221-0628", troca:"", estoque:1},
+      {tipo:"Filtro Ar Cabine Ext.", refOrig:"4S00686R", codAlmox:"5221-0626", troca:"", estoque:1},
+    ]
+  },
+  {
+    categoria:"maquinas-pesadas", marcaModelo:"Escavadeira Hidráulica CAT", moj:"MOJ 324",
+    filtros:[
+      {tipo:"Filtro Hidráulico", refOrig:"", codAlmox:"5221-0246", troca:"", estoque:0},
+      {tipo:"Filtro Hidráulico", refOrig:"", codAlmox:"5221-0247", troca:"", estoque:0},
+      {tipo:"Filtro Diesel", refOrig:"", codAlmox:"5221-0716", troca:"", estoque:0},
+      {tipo:"Filtro Ar Primário", refOrig:"", codAlmox:"5221-0829", troca:"", estoque:0},
+      {tipo:"Filtro Ar Secundário", refOrig:"", codAlmox:"5221-0830", troca:"", estoque:0},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0894", troca:"", estoque:0},
+    ]
+  },
+
+  /* ---------- CAMINHÕES ---------- */
+  {
+    categoria:"caminhoes", marcaModelo:"VW 9.170 DRC 4x2", moj:"MOJ 116/117",
+    filtros:[
+      {tipo:"Filtro de Ar", refOrig:"", codAlmox:"5217-14083", troca:"20.000 km", estoque:2},
+      {tipo:"Filtro Ante Pólen", refOrig:"", codAlmox:"5221-0594", troca:"20.000 km", estoque:1},
+      {tipo:"Filtro Sep. Água", refOrig:"", codAlmox:"5221-0595", troca:"20.000 km", estoque:2},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0596", troca:"20.000 km", estoque:1},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0597", troca:"20.000 km", estoque:1},
+    ]
+  },
+  {
+    categoria:"caminhoes", marcaModelo:"Volkswagen 13.180 (Melosa)", moj:"MOJ 240",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"", troca:"10.000 km", estoque:0},
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0200", troca:"10.000 km", estoque:1},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0271", troca:"10.000 km", estoque:1},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0176", troca:"10.000 km", estoque:1},
+      {tipo:"Filtro Sedimentador", refOrig:"", codAlmox:"5221-0270", troca:"10.000 km", estoque:1},
+    ]
+  },
+  {
+    categoria:"caminhoes", marcaModelo:"Volkswagen 19.330 (Van)", moj:"MOJ 242/243/244(ANA)/257(ANA)/263(ANA)",
+    filtros:[
+      {tipo:"Filtro de Ar da Cabine", refOrig:"", codAlmox:"5221-0295", troca:"", estoque:4},
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0141", troca:"20.000 km", estoque:5},
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0150", troca:"20.000 km", estoque:4},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0169", troca:"20.000 km", estoque:6},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0399", troca:"20.000 km", estoque:7},
+      {tipo:"Filtro Arla 32 (conferir)", refOrig:"", codAlmox:"5221-0618", troca:"", estoque:0},
+      {tipo:"Filtro Sedimentador (Refil)", refOrig:"FS-19727", codAlmox:"5221-0510 (07141583)", troca:"20.000 km", estoque:14},
+    ]
+  },
+  {
+    categoria:"caminhoes", marcaModelo:"Caminhão Basculante VW 24.280", moj:"MOJ 254/255/256/258",
+    filtros:[
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0150", troca:"", estoque:0},
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0141", troca:"", estoque:0},
+      {tipo:"Filtro Combustível", refOrig:"Parker Racor Rec. 15", codAlmox:"5221-0603 / 5221-0330", troca:"", estoque:2},
+      {tipo:"Filtro Lubrificante", refOrig:"MAN 07W115436C", codAlmox:"5221-0604", troca:"", estoque:4},
+      {tipo:"Filtro Sedimentador", refOrig:"2R0127177J", codAlmox:"5221-0413", troca:"", estoque:4},
+      {tipo:"Copo Filtro", refOrig:"", codAlmox:"521711675", troca:"Danificado", estoque:0},
+    ]
+  },
+
+  /* ---------- ÔNIBUS ---------- */
+  {
+    categoria:"onibus", marcaModelo:"Volkswagen 15.190 OD", moj:"MOJ 261/262/263/264/265/266",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0141", troca:"20.000 km", estoque:0},
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0159", troca:"20.000 km", estoque:1},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0330", troca:"20.000 km", estoque:2},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0328", troca:"20.000 km", estoque:2},
+      {tipo:"Filtro Sedimentador", refOrig:"", codAlmox:"5221-0413", troca:"20.000 km", estoque:1},
+      {tipo:"Copo Filtro", refOrig:"", codAlmox:"521711675", troca:"Danificado", estoque:0},
+    ]
+  },
+  {
+    categoria:"onibus", marcaModelo:"Mercedes Benz Apache 1418/1618 / Torino / M.B. 267-271", moj:"MOJ diversos (267/268/269/270/271)",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0216", troca:"10.000 km", estoque:6},
+      {tipo:"Filtro de Ar Externo", refOrig:"", codAlmox:"5221-0215", troca:"10.000 km", estoque:8},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0268", troca:"10.000 km", estoque:5},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0214", troca:"10.000 km", estoque:5},
+      {tipo:"Filtro Sedimentador", refOrig:"WK1060", codAlmox:"5221-0259", troca:"10.000 km", estoque:5},
+      {tipo:"Filtro Sedimentador (Ônibus 267-271)", refOrig:"WK1050", codAlmox:"5221-0423", troca:"10.000 km", estoque:5},
+    ]
+  },
+  {
+    categoria:"onibus", marcaModelo:"Ônibus Mercedes Benz 1722", moj:"MOJ 272/273/274/275",
+    filtros:[
+      {tipo:"Filtro de Ar Interno", refOrig:"", codAlmox:"5221-0141", troca:"10.000 km", estoque:0},
+      {tipo:"Filtro de Ar Externo", refOrig:"C27902 Mann Filter", codAlmox:"5221-0151", troca:"10.000 km", estoque:0},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0268", troca:"10.000 km", estoque:0},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0214", troca:"10.000 km", estoque:0},
+      {tipo:"Filtro Sedimentador", refOrig:"", codAlmox:"5221-0423", troca:"10.000 km", estoque:0},
+    ]
+  },
+
+  /* ---------- AUTOMÓVEIS ---------- */
+  {
+    categoria:"automoveis", marcaModelo:"Fiorino Ambulância", moj:"MOJ 115",
+    filtros:[
+      {tipo:"Filtro de Ar da Cabine", refOrig:"", codAlmox:"5221-0544", troca:"10.000 km", estoque:0},
+      {tipo:"Filtro de Ar", refOrig:"", codAlmox:"5217-14051", troca:"5.000 km", estoque:1},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0852", troca:"10.000 km", estoque:1},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0026", troca:"5.000 km", estoque:2},
+    ]
+  },
+  {
+    categoria:"automoveis", marcaModelo:"Fiat Uno Attractive", moj:"MOJ 118 (Seg. Trab.)",
+    filtros:[
+      {tipo:"Filtro de Ar", refOrig:"", codAlmox:"5217-14051", troca:"", estoque:0},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0852", troca:"", estoque:0},
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0026", troca:"", estoque:0},
+      {tipo:"Filtro da Cabine", refOrig:"", codAlmox:"5221-0544", troca:"", estoque:0},
+    ]
+  },
+
+  /* ---------- MOTOCICLETA ---------- */
+  {
+    categoria:"motocicleta", marcaModelo:"Honda NXR 150 Bros KS", moj:"",
+    filtros:[
+      {tipo:"Filtro de Ar", refOrig:"", codAlmox:"5221-0083", troca:"", estoque:9},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"", troca:"", estoque:0},
+      {tipo:"Graxa p/ Corrente", refOrig:"", codAlmox:"5701-0046", troca:"", estoque:0},
+    ]
+  },
+
+  /* ---------- EQUIPAMENTOS ESTACIONÁRIOS ---------- */
+  {
+    categoria:"equip-estacionarios", marcaModelo:"Compressor da Borracharia", moj:"721",
+    filtros:[
+      {tipo:"Filtro de Ar", refOrig:"", codAlmox:"5221-0363 (3)", troca:"12 meses", estoque:0},
+    ]
+  },
+  {
+    categoria:"equip-estacionarios", marcaModelo:"Motor Gerador", moj:"622",
+    filtros:[
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0399", troca:"6 meses", estoque:0},
+      {tipo:"Filtro Água", refOrig:"", codAlmox:"5221-0401", troca:"6 meses", estoque:0},
+      {tipo:"Filtro Comb. Sep. Água (2)", refOrig:"", codAlmox:"5221-0400", troca:"6 meses", estoque:0},
+      {tipo:"Filtro de Ar", refOrig:"", codAlmox:"5221-0402", troca:"6 meses", estoque:0},
+    ]
+  },
+  {
+    categoria:"equip-estacionarios", marcaModelo:"Motor Bomba", moj:"614",
+    filtros:[
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0071", troca:"6 meses", estoque:0},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0099 (2)", troca:"6 meses", estoque:0},
+      {tipo:"Filtro de Ar Prim.", refOrig:"", codAlmox:"5221-0012", troca:"6 meses", estoque:0},
+      {tipo:"Filtro de Ar Sec.", refOrig:"", codAlmox:"5221-0003", troca:"6 meses", estoque:0},
+    ]
+  },
+  {
+    categoria:"equip-estacionarios", marcaModelo:"Motor Bomba", moj:"615",
+    filtros:[
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0071", troca:"6 meses", estoque:0},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0275", troca:"6 meses", estoque:0},
+      {tipo:"Filtro de Ar Prim.", refOrig:"", codAlmox:"5221-0140", troca:"6 meses", estoque:0},
+      {tipo:"Filtro de Ar Sec.", refOrig:"", codAlmox:"5221-0242", troca:"6 meses", estoque:0},
+    ]
+  },
+  {
+    categoria:"equip-estacionarios", marcaModelo:"Motor Bomba", moj:"616",
+    filtros:[
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0071", troca:"6 meses", estoque:0},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0275 (2)", troca:"6 meses", estoque:0},
+      {tipo:"Filtro de Ar Prim.", refOrig:"", codAlmox:"5221-0241", troca:"6 meses", estoque:0},
+      {tipo:"Filtro de Ar Sec.", refOrig:"", codAlmox:"5221-0242", troca:"6 meses", estoque:0},
+    ]
+  },
+  {
+    categoria:"equip-estacionarios", marcaModelo:"Motor Bomba", moj:"520",
+    filtros:[
+      {tipo:"Filtro Lubrificante", refOrig:"", codAlmox:"5221-0071", troca:"6 meses", estoque:0},
+      {tipo:"Filtro Combustível", refOrig:"", codAlmox:"5221-0099 (2)", troca:"6 meses", estoque:0},
+      {tipo:"Filtro de Ar Prim.", refOrig:"", codAlmox:"5221-0003", troca:"6 meses", estoque:0},
+      {tipo:"Filtro de Ar Sec.", refOrig:"", codAlmox:"5221-0012", troca:"6 meses", estoque:0},
+    ]
+  },
+  {
+    categoria:"equip-estacionarios", marcaModelo:"Aspirador de Pó do Dique", moj:"",
+    filtros:[
+      {tipo:"Filtro de Ar (conferir)", refOrig:"", codAlmox:"5221-0662", troca:"", estoque:0},
+    ]
+  },
+
+  /* ---------- DIVERSOS / INSUMOS (nao sao filtros de um equipamento especifico) ---------- */
+  {
+    categoria:"diversos", marcaModelo:"Referências Diversas", moj:"itens gerais de almoxarifado",
+    filtros:[
+      {tipo:"Vela de Ignição — Fiat Strada Adventure", refOrig:"", codAlmox:"5217-1623", troca:"", estoque:0},
+      {tipo:"Correia Dentada — Fiat Strada Working", refOrig:"", codAlmox:"5210-0097", troca:"", estoque:0},
+      {tipo:"Aditivo para Automóvel", refOrig:"", codAlmox:"5701-0078", troca:"", estoque:0},
+      {tipo:"Óleo Lub. Motor S10", refOrig:"", codAlmox:"5701-0208", troca:"", estoque:0},
+      {tipo:"Óleo Direção S10", refOrig:"", codAlmox:"5701-0209", troca:"", estoque:0},
+      {tipo:"Óleo Lub. Transm. S10", refOrig:"", codAlmox:"5701-0210", troca:"", estoque:0},
+      {tipo:"Graxa p/ Rolamento", refOrig:"", codAlmox:"5701-0021", troca:"", estoque:0},
+      {tipo:"Filtro Secador de Ar do Freio (caminhão/ônibus/caçamba)", refOrig:"", codAlmox:"5221-0213", troca:"", estoque:0},
+      {tipo:"Líquido de Arrefecimento ELC CAT", refOrig:"", codAlmox:"5217-0987", troca:"", estoque:0},
+      {tipo:"Filtro Hid. da Direção dos Ônibus/Caminhões", refOrig:"", codAlmox:"5221-0163", troca:"", estoque:0},
+    ]
+  },
 ];
 
 const CATEGORIAS_PADRAO = [
@@ -733,6 +1146,10 @@ const CATEGORIAS_PADRAO = [
   {id:"onibus", label:"Ônibus"},
   {id:"caminhoes", label:"Caminhões"},
   {id:"maquinas-pesadas", label:"Máquinas Pesadas"},
+  {id:"automoveis", label:"Automóveis"},
+  {id:"motocicleta", label:"Motocicleta"},
+  {id:"equip-estacionarios", label:"Equip. Estacionários"},
+  {id:"diversos", label:"Diversos / Insumos"},
 ];
 let CATEGORIAS = [];
 
@@ -839,20 +1256,43 @@ function uid(prefix){
   return prefix + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 }
 
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g, (char)=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[char]));
+}
+
 /* ===================== Init ===================== */
 async function init(){
   await openDB();
 
-  let cats = await dbGetAllFrom("categorias");
+  const catsRaw = await dbGetAllFrom("categorias");
+  let meta = catsRaw.find(c=>c.id==="__meta__");
+  let cats = catsRaw.filter(c=>c.id!=="__meta__");
+
   if(cats.length === 0){
     for(const c of CATEGORIAS_PADRAO){ await dbPutIn("categorias", c); }
-    cats = await dbGetAllFrom("categorias");
+    cats = [...CATEGORIAS_PADRAO];
+  } else {
+    // adiciona categorias novas do app (ex: atualização) sem apagar as que o usuário já tem
+    for(const c of CATEGORIAS_PADRAO){
+      if(!cats.some(x=>x.id===c.id)){
+        await dbPutIn("categorias", c);
+        cats.push(c);
+      }
+    }
   }
   CATEGORIAS = cats;
+  if(!CATEGORIAS.some(c=>c.id===categoriaAtiva)) categoriaAtiva = CATEGORIAS[0].id;
 
-  let data = await dbGetAll();
-  if(data.length === 0){
-    // primeira execução: popular com dados iniciais
+  const versaoAtual = meta ? meta.seedVersion : 0;
+  if(versaoAtual < SEED_VERSION){
+    // nova remessa de dados: substitui todo o estoque de equipamentos pelos dados atualizados
+    await dbClearAll();
     for(const eq of SEED){
       const equip = {
         id: uid("eq"),
@@ -863,9 +1303,10 @@ async function init(){
       };
       await dbPut(equip);
     }
-    data = await dbGetAll();
+    await dbPutIn("categorias", {id:"__meta__", seedVersion: SEED_VERSION});
   }
-  equipamentos = data;
+
+  equipamentos = await dbGetAll();
   renderTabs();
   render();
 }
@@ -895,7 +1336,7 @@ function renderTabs(){
   const el = document.getElementById("tabsRow");
   el.innerHTML = CATEGORIAS.map(cat=>{
     const count = equipamentos.filter(e=>e.categoria===cat.id).length;
-    return `<div class="tab ${cat.id===categoriaAtiva?'active':''}" data-cat="${cat.id}">${cat.label}<span class="count">${count}</span></div>`;
+    return `<div class="tab ${cat.id===categoriaAtiva?'active':''}" data-cat="${escapeHTML(cat.id)}">${escapeHTML(cat.label)}<span class="count">${count}</span></div>`;
   }).join("") + `<div class="tab tab-manage" id="btnManageCats" title="Gerenciar categorias">&#9881;&#65039;</div>`;
 
   el.querySelectorAll(".tab[data-cat]").forEach(t=>{
@@ -913,7 +1354,7 @@ function refreshEquipCategoriaSelect(){
   const sel = document.getElementById("equipCategoria");
   if(!sel) return;
   const atual = sel.value;
-  sel.innerHTML = CATEGORIAS.map(c=>`<option value="${c.id}">${c.label}</option>`).join("");
+  sel.innerHTML = CATEGORIAS.map(c=>`<option value="${escapeHTML(c.id)}">${escapeHTML(c.label)}</option>`).join("");
   if(CATEGORIAS.some(c=>c.id===atual)) sel.value = atual;
 }
 
@@ -958,8 +1399,8 @@ function render(){
     <div class="equip-card ${isOpen?'open':''}" data-id="${eq.id}">
       <div class="equip-head" data-toggle="${eq.id}">
         <div>
-          <div class="equip-title">${eq.marcaModelo}</div>
-          ${eq.moj ? `<div class="equip-moj">${eq.moj}</div>` : ''}
+          <div class="equip-title">${escapeHTML(eq.marcaModelo)}</div>
+          ${eq.moj ? `<div class="equip-moj">${escapeHTML(eq.moj)}</div>` : ''}
         </div>
         <div class="equip-meta">
           <div class="badge-count ${temBaixo?'has-low':''}">${eq.filtros.length} filtros</div>
@@ -969,16 +1410,16 @@ function render(){
       <div class="filtro-list">
         ${eq.filtros.map(f=>`
           <div class="filtro-row">
-            <div class="filtro-tipo">${f.tipo}</div>
+            <div class="filtro-tipo">${escapeHTML(f.tipo)}</div>
             <div class="estoque-box">
-              <div class="estoque-num ${estoqueClass(f.estoque)}">${f.estoque}</div>
+              <div class="estoque-num ${estoqueClass(f.estoque)}">${escapeHTML(f.estoque)}</div>
               <div class="estoque-label">estoque</div>
             </div>
             <div class="filtro-codes mono">
-              ${f.refOrig ? `<span><b>Ref:</b> ${f.refOrig}</span>` : ''}
+              ${f.refOrig ? `<span><b>Ref:</b> ${escapeHTML(f.refOrig)}</span>` : ''}
               ${f.codAlmox ? `<span><b>Cód:</b> ${f.codAlmox}</span>` : ''}
             </div>
-            ${f.troca ? `<div class="filtro-troca">Troca: ${f.troca}</div>` : '<div></div>'}
+            ${f.troca ? `<div class="filtro-troca">Troca: ${escapeHTML(f.troca)}</div>` : '<div></div>'}
             <div class="row-actions">
               <button data-edit-filtro="${eq.id}|${f.id}">Editar</button>
               <button data-del-filtro="${eq.id}|${f.id}">Excluir</button>
@@ -1043,6 +1484,76 @@ function attachListRowListeners(){
     });
   });
 }
+
+/* ===================== Sheet: Editar código cadastrado ===================== */
+const overlayCodigos = document.getElementById("overlayCodigos");
+
+function collectCodigos(){
+  const map = new Map();
+  equipamentos.forEach(eq => eq.filtros.forEach(f=>{
+    const c = (f.codAlmox||"").trim();
+    if(!c) return;
+    map.set(c, (map.get(c)||0) + 1);
+  }));
+  return [...map.entries()].sort((a,b)=> a[0].localeCompare(b[0]));
+}
+
+function renderCodigosList(filtro=""){
+  const el = document.getElementById("codigosList");
+  const termo = filtro.trim().toLowerCase();
+  let lista = collectCodigos();
+  if(termo) lista = lista.filter(([c])=> c.toLowerCase().includes(termo));
+
+  if(lista.length === 0){
+    el.innerHTML = `<p style="color:var(--text-faint);font-size:12px;padding:10px 0;">Nenhum código encontrado.</p>`;
+    return;
+  }
+
+  el.innerHTML = lista.map(([codigo, count])=>`
+    <div class="cat-row">
+      <input type="text" value="${codigo}">
+      <span style="font-size:11px;color:var(--text-faint);white-space:nowrap;">${count}x</span>
+      <button data-save-codigo="${codigo}">Salvar</button>
+    </div>
+  `).join("");
+
+  el.querySelectorAll("[data-save-codigo]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const row = btn.closest(".cat-row");
+      const oldCodigo = btn.dataset.saveCodigo;
+      const newCodigo = row.querySelector("input").value.trim();
+      if(!newCodigo){ toast("Código não pode ficar vazio"); return; }
+      if(newCodigo === oldCodigo){ toast("Nada mudou"); return; }
+
+      let alterados = 0;
+      for(const eq of equipamentos){
+        let mudou = false;
+        eq.filtros.forEach(f=>{
+          if((f.codAlmox||"").trim() === oldCodigo){
+            f.codAlmox = newCodigo;
+            mudou = true;
+            alterados++;
+          }
+        });
+        if(mudou) await dbPut(eq);
+      }
+      render();
+      renderCodigosList(document.getElementById("codigoSearchInput").value);
+      toast(`Código atualizado em ${alterados} item(ns)`);
+    });
+  });
+}
+
+document.getElementById("btnManageCodigos").addEventListener("click", ()=>{
+  document.getElementById("codigoSearchInput").value = "";
+  renderCodigosList();
+  overlayCodigos.classList.add("show");
+});
+document.getElementById("codigoSearchInput").addEventListener("input", (e)=>{
+  renderCodigosList(e.target.value);
+});
+document.getElementById("btnCloseCodigos").addEventListener("click", ()=> overlayCodigos.classList.remove("show"));
+overlayCodigos.addEventListener("click",(e)=>{ if(e.target===overlayCodigos) overlayCodigos.classList.remove("show"); });
 
 /* ===================== Sheets: Categorias ===================== */
 const overlayCats = document.getElementById("overlayCats");
@@ -1333,6 +1844,12 @@ function toast(msg){
   el.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=> el.classList.remove("show"), 2200);
+}
+
+if("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
 }
 
 init();
