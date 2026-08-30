@@ -279,14 +279,20 @@
   }
   .filtro-codes{
     grid-column:1 / 2;
-    font-size:11px;
-    color:var(--text-faint);
+    font-size:16px;
+    line-height:1.35;
+    color:var(--text);
     display:flex;
     gap:10px;
     flex-wrap:wrap;
-    margin-top:1px;
+    margin-top:2px;
   }
-  .filtro-codes span b{color:var(--text-dim);font-weight:600;}
+  .filtro-codes span b{
+    color:var(--text-dim);
+    font-weight:700;
+    font-size:12px;
+    margin-right:4px;
+  }
   .filtro-troca{
     grid-column:1/2;
     font-size:10.5px;
@@ -331,8 +337,29 @@
   .equip-footer{
     padding:10px 14px 12px 18px;
     display:flex;
+    flex-wrap:wrap;
     justify-content:space-between;
+    align-items:center;
     gap:10px;
+  }
+  .equip-footer-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 14px;
+  }
+  .field-check{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    margin-bottom:12px;
+    font-size:13px;
+    color:var(--text-dim);
+    line-height:1.4;
+  }
+  .field-check input[type="checkbox"]{
+    width:auto;
+    margin-top:3px;
+    flex-shrink:0;
   }
   .link-btn{
     background:none;border:none;
@@ -542,7 +569,6 @@
 </div>
 <div class="toolbar-bottom" style="margin-top:8px;">
   <button id="btnManageCodigos">&#128295; Editar código cadastrado</button>
-  <button id="btnInstallHelp">&#128241; Como instalar no celular</button>
 </div>
 
 <button class="fab" id="fabAdd" title="Adicionar equipamento">+</button>
@@ -563,11 +589,17 @@
     </div>
     <div class="field">
       <label>Marca / Modelo</label>
-      <input type="text" id="equipMarcaModelo" placeholder="Ex: New Holland 7630">
+      <input type="text" id="equipMarcaModelo" list="marcaModeloList" placeholder="Ex: New Holland 7630" autocomplete="off">
+      <datalist id="marcaModeloList"></datalist>
     </div>
+    <p class="hint">Pode escolher uma marca/modelo já cadastrada na lista e só informar o novo MOJ / frota.</p>
     <div class="field">
       <label>MOJ / Frota (opcional)</label>
       <input type="text" id="equipMoj" placeholder="Ex: MOJ 428">
+    </div>
+    <div class="field-check" id="equipCopiarWrap">
+      <input type="checkbox" id="equipCopiarFiltros">
+      <label for="equipCopiarFiltros">Copiar filtros de um cadastro já existente desta marca/modelo</label>
     </div>
     <div class="sheet-actions">
       <button class="btn-secondary" id="btnCancelEquip">Cancelar</button>
@@ -627,24 +659,6 @@
     </div>
     <div class="sheet-actions">
       <button class="btn-secondary" id="btnCloseCats">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Sheet: como instalar -->
-<div class="overlay" id="overlayInstall">
-  <div class="sheet">
-    <h2>Instalar no celular</h2>
-    <div style="font-size:13px;line-height:1.7;color:var(--text-dim);">
-      <p><b style="color:var(--text)">Android com APK:</b><br>
-      Este projeto agora tem a pasta <b>android</b>. Gere o APK por ela e instale o arquivo no celular; assim vira aplicativo instalado de verdade, sem depender de "Adicionar à tela inicial".</p>
-      <p><b style="color:var(--text)">Android pelo navegador:</b><br>
-      Se você abrir por um link HTTPS, o Chrome também pode mostrar <b>"Instalar app"</b>. O app fica em tela cheia e continua abrindo offline depois do primeiro carregamento.</p>
-      <p style="margin-top:14px;color:var(--text-faint);font-size:12px;">
-      Abrir o HTML direto como arquivo continua funcionando, mas service worker só é liberado pelo navegador em localhost ou HTTPS.</p>
-    </div>
-    <div class="sheet-actions">
-      <button class="btn-primary" id="btnCloseInstall" style="flex:1;">Entendi</button>
     </div>
   </div>
 </div>
@@ -1417,7 +1431,7 @@ function render(){
             </div>
             <div class="filtro-codes mono">
               ${f.refOrig ? `<span><b>Ref:</b> ${escapeHTML(f.refOrig)}</span>` : ''}
-              ${f.codAlmox ? `<span><b>Cód:</b> ${f.codAlmox}</span>` : ''}
+              ${f.codAlmox ? `<span><b>Cód:</b> ${escapeHTML(f.codAlmox)}</span>` : ''}
             </div>
             ${f.troca ? `<div class="filtro-troca">Troca: ${escapeHTML(f.troca)}</div>` : '<div></div>'}
             <div class="row-actions">
@@ -1428,7 +1442,11 @@ function render(){
         `).join("")}
       </div>
       <div class="equip-footer">
-        <button class="link-btn" data-add-filtro="${eq.id}">+ Adicionar filtro</button>
+        <div class="equip-footer-actions">
+          <button class="link-btn" data-add-filtro="${eq.id}">+ Adicionar filtro</button>
+          <button class="link-btn" data-edit-equip="${eq.id}">Editar cadastro</button>
+          <button class="link-btn" data-copy-equip="${eq.id}">+ Equip. nesta marca</button>
+        </div>
         <button class="link-btn danger-link" data-del-equip="${eq.id}">Excluir equipamento</button>
       </div>
     </div>`;
@@ -1449,6 +1467,18 @@ function attachListRowListeners(){
     el.addEventListener("click",(e)=>{
       e.stopPropagation();
       openFiltroSheet(el.dataset.addFiltro, null);
+    });
+  });
+  document.querySelectorAll("[data-edit-equip]").forEach(el=>{
+    el.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      openEquipSheet({id: el.dataset.editEquip});
+    });
+  });
+  document.querySelectorAll("[data-copy-equip]").forEach(el=>{
+    el.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      openEquipSheet({copyFromId: el.dataset.copyEquip});
     });
   });
   document.querySelectorAll("[data-edit-filtro]").forEach(el=>{
@@ -1632,12 +1662,6 @@ document.getElementById("btnAddCategoria").addEventListener("click", async ()=>{
 document.getElementById("btnCloseCats").addEventListener("click", ()=> overlayCats.classList.remove("show"));
 overlayCats.addEventListener("click",(e)=>{ if(e.target===overlayCats) overlayCats.classList.remove("show"); });
 
-/* ===================== Sheet: Como instalar ===================== */
-const overlayInstall = document.getElementById("overlayInstall");
-document.getElementById("btnInstallHelp").addEventListener("click", ()=> overlayInstall.classList.add("show"));
-document.getElementById("btnCloseInstall").addEventListener("click", ()=> overlayInstall.classList.remove("show"));
-overlayInstall.addEventListener("click",(e)=>{ if(e.target===overlayInstall) overlayInstall.classList.remove("show"); });
-
 /* ===================== Exportar Excel ===================== */
 function sheetSafeName(str){
   return str.replace(/[:\\/?*\[\]]/g,"").slice(0,31) || "Categoria";
@@ -1695,14 +1719,75 @@ document.getElementById("btnExportExcel").addEventListener("click", ()=>{
 /* ===================== Sheets: Equipamento ===================== */
 const overlayEquip = document.getElementById("overlayEquip");
 
-document.getElementById("fabAdd").addEventListener("click", ()=>{
-  document.getElementById("equipSheetTitle").textContent = "Novo equipamento";
-  document.getElementById("equipId").value = "";
-  document.getElementById("equipCategoria").value = categoriaAtiva;
-  document.getElementById("equipMarcaModelo").value = "";
-  document.getElementById("equipMoj").value = "";
+function fillMarcaModeloDatalist(){
+  const dl = document.getElementById("marcaModeloList");
+  if(!dl) return;
+  const seen = new Set();
+  const opts = [];
+  equipamentos.forEach(eq=>{
+    const key = (eq.marcaModelo||"").trim().toLowerCase();
+    if(!key || seen.has(key)) return;
+    seen.add(key);
+    opts.push(`<option value="${escapeHTML(eq.marcaModelo)}"></option>`);
+  });
+  dl.innerHTML = opts.join("");
+}
+
+function copiarFiltrosDoModelo(marcaModelo, categoria, exceptId){
+  const key = (marcaModelo||"").trim().toLowerCase();
+  if(!key) return [];
+  const candidatos = equipamentos.filter(e=>{
+    if(exceptId && e.id===exceptId) return false;
+    if((e.marcaModelo||"").trim().toLowerCase()!==key) return false;
+    if(categoria && e.categoria!==categoria) return false;
+    return (e.filtros||[]).length > 0;
+  });
+  if(!candidatos.length) return [];
+  candidatos.sort((a,b)=>b.filtros.length - a.filtros.length);
+  return candidatos[0].filtros.map(f=>({
+    id: uid("f"),
+    tipo: f.tipo,
+    refOrig: f.refOrig||"",
+    codAlmox: f.codAlmox||"",
+    troca: f.troca||"",
+    estoque: Number(f.estoque)||0
+  }));
+}
+
+function openEquipSheet(opts){
+  fillMarcaModeloDatalist();
+  const copyWrap = document.getElementById("equipCopiarWrap");
+  if(opts && opts.id){
+    const eq = equipamentos.find(x=>x.id===opts.id);
+    if(!eq) return;
+    document.getElementById("equipSheetTitle").textContent = "Editar cadastro";
+    document.getElementById("equipId").value = eq.id;
+    document.getElementById("equipCategoria").value = eq.categoria;
+    document.getElementById("equipMarcaModelo").value = eq.marcaModelo;
+    document.getElementById("equipMoj").value = eq.moj || "";
+    copyWrap.style.display = "none";
+    document.getElementById("equipCopiarFiltros").checked = false;
+  } else {
+    document.getElementById("equipSheetTitle").textContent = "Novo equipamento";
+    document.getElementById("equipId").value = "";
+    document.getElementById("equipCategoria").value = categoriaAtiva;
+    document.getElementById("equipMarcaModelo").value = "";
+    document.getElementById("equipMoj").value = "";
+    copyWrap.style.display = "";
+    document.getElementById("equipCopiarFiltros").checked = false;
+    if(opts && opts.copyFromId){
+      const eq = equipamentos.find(x=>x.id===opts.copyFromId);
+      if(eq){
+        document.getElementById("equipCategoria").value = eq.categoria;
+        document.getElementById("equipMarcaModelo").value = eq.marcaModelo;
+        document.getElementById("equipCopiarFiltros").checked = true;
+      }
+    }
+  }
   overlayEquip.classList.add("show");
-});
+}
+
+document.getElementById("fabAdd").addEventListener("click", ()=> openEquipSheet(null));
 
 document.getElementById("btnCancelEquip").addEventListener("click", ()=> overlayEquip.classList.remove("show"));
 overlayEquip.addEventListener("click",(e)=>{ if(e.target===overlayEquip) overlayEquip.classList.remove("show"); });
@@ -1712,19 +1797,44 @@ document.getElementById("btnSaveEquip").addEventListener("click", async ()=>{
   if(!marcaModelo){ toast("Informe a marca/modelo"); return; }
   const categoria = document.getElementById("equipCategoria").value;
   const moj = document.getElementById("equipMoj").value.trim();
+  const id = document.getElementById("equipId").value;
+
+  if(id){
+    const eq = equipamentos.find(x=>x.id===id);
+    if(!eq){ toast("Cadastro não encontrado"); return; }
+    eq.categoria = categoria;
+    eq.marcaModelo = marcaModelo;
+    eq.moj = moj;
+    await dbPut(eq);
+    overlayEquip.classList.remove("show");
+    categoriaAtiva = categoria;
+    renderTabs();
+    render();
+    toast("Cadastro atualizado");
+    return;
+  }
+
+  let filtros = [];
+  if(document.getElementById("equipCopiarFiltros").checked){
+    filtros = copiarFiltrosDoModelo(marcaModelo, categoria);
+    if(filtros.length === 0){
+      toast("Não achei filtros nessa marca/modelo para copiar");
+    }
+  }
 
   const novo = {
     id: uid("eq"),
     categoria, marcaModelo, moj,
-    filtros: []
+    filtros
   };
   await dbPut(novo);
   equipamentos.push(novo);
   categoriaAtiva = categoria;
   overlayEquip.classList.remove("show");
+  openCards.add(novo.id);
   renderTabs();
   render();
-  toast("Equipamento adicionado");
+  toast(filtros.length ? `Equipamento adicionado com ${filtros.length} filtro(s)` : "Equipamento adicionado");
 });
 
 /* ===================== Sheets: Filtro ===================== */
